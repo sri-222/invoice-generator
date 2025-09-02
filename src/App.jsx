@@ -60,16 +60,24 @@ export default function App() {
       :root{--primary:#14b8a6;--bg:#f8fafc;--card:#fff;--text:#334155;--muted:#94a3b8;--border:#e2e8f0;}
       *{box-sizing:border-box}
       body{font-family:Inter,Segoe UI,Roboto,system-ui,-apple-system;background:var(--bg);margin:0;color:var(--text);}
-      .app-shell{display:flex;min-height:100vh;gap:24px;padding:20px;max-width:1400px;margin:0 auto}
+      .app-shell{
+        display:flex;
+        min-height:100vh;
+        gap:24px;
+        padding:20px;
+        max-width: 95%;
+        margin:0 auto
+      }
       .sidebar{width:220px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px;align-self:flex-start;}
       .brand{font-weight:700;color:var(--primary);font-size:20px;margin-bottom:12px}
       .nav{display:flex;flex-direction:column;gap:8px}
       .nav button{background:transparent;border:none;text-align:left;padding:10px;border-radius:8px;cursor:pointer;font-size:15px;color:var(--text)}
       .nav button.active{background:rgba(20,184,166,0.1);color:var(--primary);font-weight:600}
       .nav button:hover{background:rgba(20,184,166,0.05);}
-      .main{flex:1}
+      .main{flex:1; min-width: 0;}
       .card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:24px;margin-bottom:24px}
       .row{display:flex;gap:18px}
+      .form-grid{display:grid; grid-template-columns:1fr 1fr; gap:18px; align-items:flex-end;}
       h2{margin:0 0 18px 0; font-weight:600;}
       h3{margin:0 0 8px 0; font-weight:600;}
       table{width:100%;border-collapse:collapse}
@@ -77,16 +85,52 @@ export default function App() {
       th{background:#f8fafc;color:#64748b;font-weight:600;font-size:13px;text-transform:uppercase;}
       tr:last-child td{border-bottom:none;}
       .right{text-align:right}
-      .button{background:var(--primary);color:#fff;border:none;padding:10px 16px;border-radius:8px;cursor:pointer;font-weight:600;font-size:14px;}
+      .button{
+        background:var(--primary);
+        color:var(--text);
+        border:none;
+        padding:10px 16px;
+        border-radius:8px;
+        cursor:pointer;
+        font-weight:600;
+        font-size:14px;
+      }
       .button.ghost{background:transparent;color:var(--primary);border:1px solid rgba(20,184,166,0.3);}
       .button:hover{opacity:0.9}
       .small{font-size:13px}
       label{display:block; margin-bottom:4px; font-weight:500;font-size:14px;}
-      input,textarea,select{padding:10px;border:1px solid var(--border);border-radius:6px;width:100%;font-size:14px;background:#fff;}
+      input,textarea,select{
+        padding:10px;
+        border:1px solid var(--border);
+        border-radius:6px;
+        width:100%;
+        font-size:14px;
+        background:#fff;
+        color: var(--text);
+      }
       .totals{width:320px;margin-left:auto}
       .totals-row{display:flex;justify-content:space-between;align-items:center;margin-top:8px;}
       .totals-row input{width:80px;text-align:right;}
-      @media(max-width:900px){.app-shell{flex-direction:column;padding:12px}.sidebar{width:100%;display:flex;flex-direction:row;overflow:auto;align-items:center;}.nav{flex-direction:row;flex:1;}.brand{margin-bottom:0;}.main{width:100%}}
+
+      /* Hide arrows from number inputs */
+      input[type=number]::-webkit-inner-spin-button, 
+      input[type=number]::-webkit-outer-spin-button { 
+        -webkit-appearance: none; 
+        margin: 0; 
+      }
+      input[type=number] {
+        -moz-appearance: textfield;
+      }
+      
+      @media(max-width:900px){
+        .app-shell{flex-direction:column;padding:12px; max-width:100%;}
+        .sidebar{width:100%;display:flex;flex-direction:row;overflow:auto;align-items:center;}
+        .nav{flex-direction:row;flex:1;}
+        .brand{margin-bottom:0;}
+        .main{width:100%;}
+        .row, .form-grid {flex-direction:column; gap:12px;}
+        .totals{width:100%;margin-left:0;}
+      }
     `;
     document.head.appendChild(s);
   }, []);
@@ -235,7 +279,7 @@ export default function App() {
       <div>
         <div className="card">
           <h2>Settings</h2>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18 }}>
+          <div className="form-grid">
             <div>
               <label>Business Name</label>
               <input
@@ -327,10 +371,10 @@ export default function App() {
     
     const computeTotals = (inv) => {
       const subtotal = inv.items.reduce(
-        (a, it) => a + (it.qty || 0) * (it.price || 0),
+        (a, it) => a + (Number(it.qty) || 0) * (Number(it.price) || 0),
         0
       );
-      const gst = subtotal * ((inv.gstRate || 0) / 100);
+      const gst = subtotal * ((Number(inv.gstRate) || 0) / 100);
       const total = subtotal + gst;
       return { ...inv, subtotal, gst, total };
     };
@@ -342,13 +386,13 @@ export default function App() {
     const addItem = () => {
       setDraft((d) => ({
         ...d,
-        items: [...d.items, { id: Date.now(), name: "", qty: 1, price: 0 }],
+        items: [...d.items, { id: Date.now(), name: "", qty: '1', price: '0' }],
       }));
     };
     const updateItem = (id, key, val) => {
       setDraft((d) => {
         const items = d.items.map((it) =>
-          it.id === id ? { ...it, [key]: key === "name" ? val : Number(val) } : it
+          it.id === id ? { ...it, [key]: val } : it
         );
         return computeTotals({ ...d, items });
       });
@@ -359,7 +403,7 @@ export default function App() {
       );
 
     const saveInvoice = () => {
-      if (draft.items.length === 0) return alert("Add at least one item");
+      if (draft.items.filter(it => it.name).length === 0) return alert("Add at least one item with a name");
       if (!draft.customerName) return alert("Please select or add a customer");
       
       const newInv = { ...draft, id: draft.id || Date.now() };
@@ -386,12 +430,70 @@ export default function App() {
         ).padStart(3, "0")}`,
       });
     };
+    
+    const downloadPDF = () => {
+        const { jsPDF } = window.jspdf;
+        if (!jsPDF) {
+            alert("PDF library is not loaded yet. Please try again in a moment.");
+            return;
+        }
 
-    const loadInvoice = (inv) => setDraft(inv);
-    const deleteInvoice = (id) => setInvoices(invoices.filter((i) => i.id !== id));
+        const doc = new jsPDF();
+        const itemsToPrint = draft.items.filter(it => it.name);
+
+        // Add Business Details
+        doc.setFontSize(20);
+        doc.text(business.name, 14, 22);
+        doc.setFontSize(11);
+        doc.text(business.address, 14, 30);
+        doc.text(`GSTIN: ${business.gstin}`, 14, 36);
+
+        // Add Invoice Details
+        doc.setFontSize(16);
+        doc.text(`Invoice #${draft.number}`, 14, 50);
+        doc.setFontSize(11);
+        doc.text(`Date: ${draft.date}`, 14, 56);
+
+        // Add Customer Details
+        doc.text("Bill To:", 14, 66);
+        doc.setFont("helvetica", "bold");
+        doc.text(draft.customerName, 14, 72);
+        doc.setFont("helvetica", "normal");
+        doc.text(draft.customerAddress, 14, 78);
+
+        // Add Items Table using autoTable
+        doc.autoTable({
+            startY: 90,
+            head: [['Item', 'Qty', 'Price', 'Amount']],
+            body: itemsToPrint.map(it => [
+                it.name,
+                it.qty,
+                { content: fmtINR(it.price), styles: { halign: 'right' } },
+                { content: fmtINR(it.qty * it.price), styles: { halign: 'right' } }
+            ]),
+            theme: 'grid',
+            headStyles: { fillColor: [22, 160, 133] }
+        });
+
+        // Add Totals
+        const finalY = doc.autoTable.previous.finalY;
+        doc.setFontSize(12);
+        doc.text("Subtotal:", 150, finalY + 10, { align: 'right' });
+        doc.text(fmtINR(draft.subtotal), 200, finalY + 10, { align: 'right' });
+        doc.text(`GST (${draft.gstRate}%):`, 150, finalY + 17, { align: 'right' });
+        doc.text(fmtINR(draft.gst), 200, finalY + 17, { align: 'right' });
+        doc.setFont("helvetica", "bold");
+        doc.text("Total:", 150, finalY + 24, { align: 'right' });
+        doc.text(fmtINR(draft.total), 200, finalY + 24, { align: 'right' });
+        
+        // Save the PDF
+        doc.save(`Invoice-${draft.number}.pdf`);
+    };
 
     const printInvoice = () => {
       const w = window.open("", "_blank", "width=800,height=900");
+      const itemsToPrint = draft.items.filter(it => it.name);
+
       const html = `
         <html><head><title>${draft.number}</title>
         <style>body{font-family:Arial,Helvetica,sans-serif;padding:20px}table{width:100%;border-collapse:collapse}th,td{padding:8px;border:1px solid #ddd; text-align:left;} th:nth-child(n+2), td:nth-child(n+2){text-align:right;}</style>
@@ -403,7 +505,7 @@ export default function App() {
         <p>Date: ${draft.date}</p>
         <p><b>To: ${draft.customerName}</b><br/>${draft.customerAddress.replace(/\n/g, "<br>")}</p>
         <table><thead><tr><th>Item</th><th>Qty</th><th>Price</th><th>Amount</th></tr></thead><tbody>
-        ${draft.items
+        ${itemsToPrint
           .map(
             (it) =>
               `<tr><td>${it.name}</td><td>${it.qty}</td><td>${fmtINR(
@@ -424,6 +526,9 @@ export default function App() {
       w.focus();
       w.print();
     };
+
+    const loadInvoice = (inv) => setDraft(inv);
+    const deleteInvoice = (id) => setInvoices(invoices.filter((i) => i.id !== id));
 
     return (
       <div>
@@ -458,7 +563,7 @@ export default function App() {
           </div>
 
           <div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 18, alignItems: 'flex-end' }}>
+            <div className="form-grid">
               <div>
                 <label>Invoice Number</label>
                 <input
@@ -526,26 +631,30 @@ export default function App() {
                       </td>
                       <td style={{ width: 80 }}>
                         <input
-                          type="number"
-                          min="1"
+                          type="text"
+                          inputMode="numeric"
                           value={it.qty}
-                          onChange={(e) =>
-                            updateItem(it.id, "qty", e.target.value)
-                          }
+                          onChange={(e) => {
+                            if (/^\d*$/.test(e.target.value)) {
+                              updateItem(it.id, "qty", e.target.value);
+                            }
+                          }}
                         />
                       </td>
                       <td className="right">
                         <input
-                          type="number"
-                          min="0"
+                          type="text"
+                          inputMode="numeric"
                           value={it.price}
-                          onChange={(e) =>
-                            updateItem(it.id, "price", e.target.value)
-                          }
+                           onChange={(e) => {
+                            if (/^\d*\.?\d{0,2}$/.test(e.target.value)) {
+                              updateItem(it.id, "price", e.target.value);
+                            }
+                          }}
                         />
                       </td>
                       <td className="right">
-                        {fmtINR((it.qty || 0) * (it.price || 0))}
+                        {fmtINR((Number(it.qty) || 0) * (Number(it.price) || 0))}
                       </td>
                       <td className="right">
                         <button
@@ -603,7 +712,10 @@ export default function App() {
             <hr style={{margin:"24px 0", borderTop:"1px solid var(--border)", borderBottom:"none"}}/>
 
             <div style={{display:'flex', justifyContent:'space-between'}}>
-                <button className="button ghost" onClick={printInvoice}>Print</button>
+                <div style={{display: 'flex', gap: '8px'}}>
+                    <button className="button ghost" onClick={printInvoice}>Print</button>
+                    <button className="button ghost" onClick={downloadPDF}>Download PDF</button>
+                </div>
                 <button className="button" onClick={saveInvoice}>
                     {draft.id ? "Update Invoice" : "Save Invoice"}
                 </button>
@@ -720,3 +832,5 @@ export default function App() {
     </div>
   );
 }
+
+
