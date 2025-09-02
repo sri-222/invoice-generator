@@ -1,0 +1,80 @@
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+    Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  background-color: #f4f7f9;
+  display: flex;
+  justify-content: center;
+  padding-top: 40px;
+  margin: 0;
+}
+
+.app-container {
+  display: flex;
+  gap: 40px;
+  width: 1000px;
+  max-width: 95%;
+}
+
+.billing-form,
+.bill-view {
+  background-color: #ffffff;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.billing-form {
+  flex: 1;
+}
+
+.bill-view {
+  flex: 1.5;
+}
+
+h1, h2, h3 {
+  color: #333;
+  margin-top: 0;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #555;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+button {
+  width: 100%;
+  padding: 12px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+.total-section {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 2px solid #eee;
+  text-align: right;
+  font-size: 1.2em;
+}
